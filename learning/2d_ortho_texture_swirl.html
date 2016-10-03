@@ -1,0 +1,380 @@
+<html>
+
+<!--Render an image with 2D ortho projection -->
+
+<!--  
+Finish-20140625_2317 : 1. http://www.geeks3d.com/20110428/shader-library-swirl-post-processing-filter-in-glsl/
+
+TODO: 
+2. http://www.geeks3d.com/20100909/shader-library-gaussian-blur-post-processing-filter-in-glsl/
+3. http://www.geeks3d.com/20110219/shader-library-crosshatching-glsl-filter/
+-->
+
+<head>
+<title>Learning WebGL &mdash; lesson 1</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
+	uniform float time;
+	uniform float rt_w;    // window width
+    uniform float rt_h;    // window height
+
+    uniform float radius;
+    uniform float angle;
+    uniform vec2 center; 
+	
+    vec4 PostFX(sampler2D tex, vec2 uv, float time)
+    {
+        vec2 texSize = vec2(rt_w, rt_h);
+        vec2 tc = uv * texSize;
+        tc -= center;
+
+        float dist = length(tc);
+        if (dist < radius)
+        {
+            float percent = (radius - dist) / radius;
+            float theta = percent * percent * angle * 0.8;
+            float s = sin(theta);
+            float c = cos(theta);
+            // p = vec(c, -s)
+            // q = vec(s, c)
+            // p, q, is orthotropic. 
+            tc = vec2(dot(tc, vec2(c, -s)), dot(tc, vec2(s, c)));
+        }
+        tc += center;
+        vec3 color = texture2D(tex, tc / texSize).rgb;
+        return vec4(color, 1.0);
+    }
+
+    void main(void) 
+    {
+        vec2 uv = vTextureCoord.st;
+        gl_FragColor = PostFX(uSampler, uv, time);
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord; 
+
+    uniform mat4 uMVMatrix; 
+    uniform mat4 uPMatrix;
+
+	varying vec2 vTextureCoord;    // pass to fragment shader.
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    var gl;
+    function initGL(canvas) {
+        try {
+            gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+
+        // alert("initGL");
+    }
+
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+
+    var shaderProgram;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+
+        shaderProgram.timeUniform = gl.getUniformLocation(shaderProgram, "time");
+        shaderProgram.widthUniform = gl.getUniformLocation(shaderProgram, "rt_w");
+        shaderProgram.heightUniform = gl.getUniformLocation(shaderProgram, "rt_h");
+        shaderProgram.radiusUniform = gl.getUniformLocation(shaderProgram, "radius");
+        shaderProgram.angleUniform = gl.getUniformLocation(shaderProgram, "angle");
+        shaderProgram.centerUniform = gl.getUniformLocation(shaderProgram, "center");
+    }
+
+    function handleLoadedTexture(texture) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    var textureObj;
+
+    function initTexture() {
+        textureObj = gl.createTexture();
+        textureObj.image = new Image();
+
+        textureObj.image.onload = function () {
+            handleLoadedTexture(textureObj)
+        }
+
+        textureObj.image.src = "crate.gif";
+    }
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
+    function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    }
+
+    var radius = 0;
+    var centerX = 250.0;
+    var centerY = 250.0;
+    var angle = 0;
+
+    function setOtherUniforms() {
+        gl.uniform1f(shaderProgram.timeUniform, 0.0);
+        gl.uniform1f(shaderProgram.widthUniform, gl.viewportWidth);
+        gl.uniform1f(shaderProgram.heightUniform, gl.viewportHeight);
+
+        // console.log("%f, %f", gl.viewportWidth, gl.viewportHeight);
+
+        // vec2(400.0, 300.0)
+        gl.uniform1f(shaderProgram.radiusUniform, radius);
+        gl.uniform2f(shaderProgram.centerUniform, centerX, centerY);
+        gl.uniform1f(shaderProgram.angleUniform, angle);
+
+        // gl.uniform1f(shaderProgram.angle, 2.8);  // This case will not report error, but ....
+     }
+
+    var squareVertexPositionBuffer;
+    var squareVertexTexCoordBuffer;
+
+    function initBuffers() {
+        var width = gl.viewportWidth;
+        var height = gl.viewportHeight;
+        squareVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        vertices = [
+            width, height, 0.0,
+            0, height, 0.0,
+            width, 0.0, 0.0,
+            0.0, 0.0, 0.0
+
+            //width/2.0, height/2.0, 0.0,
+            //-width/2.0, height/2.0, 0.0,
+            //width/2.0, -height/2.0, 0.0,
+            //-width/2.0, -height/2.0, 0.0
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        squareVertexPositionBuffer.itemSize = 3;    // 一个顶点3个float
+        squareVertexPositionBuffer.numItems = 4;    // 一个四边形四个顶点
+
+        squareVertexTexCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        texCoords = [
+            1.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+        squareVertexTexCoordBuffer.itemSize = 2;
+        squareVertexTexCoordBuffer.numItems = 4;
+
+    }
+
+    var xTran = 0;
+
+    function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.ortho(0, gl.viewportWidth, 0, gl.viewportHeight, 0, 100, pMatrix);
+
+        mat4.identity(mvMatrix);
+        // mat4.translate(mvMatrix, [xTran-50, 0.0, 0.0]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, squareVertexTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textureObj);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+        setMatrixUniforms();
+        setOtherUniforms();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+    }
+
+    function tick()
+    {
+        requestAnimFrame(tick);
+        drawScene();
+    }
+
+    function webGLStart() {
+        var canvas = document.getElementById("lesson01-canvas");
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.TEXTURE_2D);
+
+        canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+
+        // drawScene();
+        tick();
+    }  
+
+    function showValueR(newValue)
+    {   
+        document.getElementById("radius").innerHTML=newValue;
+        radius = newValue;
+    }
+
+    function showValueA(newValue)
+    {   
+        document.getElementById("angle").innerHTML=newValue;
+        angle = newValue;
+    }
+
+    var mouseTracking = -1;
+
+    function handleMouseDown(event) 
+    {
+        if (event.button == 0)
+        {
+            mouseTracking = 0;
+
+            centerX = event.clientX;
+            centerY = gl.viewportHeight - event.clientY;
+
+            console.log("xxoo");
+        }
+    }
+
+    function handleMouseUp(event) 
+    {
+        mouseTracking = -1;
+    }
+
+    function handleMouseMove(event) 
+    {
+        if (mouseTracking == -1) {
+            return;
+        }
+
+        centerX = event.clientX;
+        centerY = gl.viewportHeight - event.clientY;
+    }
+
+</script>
+
+
+</head>
+
+
+<body onload="webGLStart();">
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+
+    <canvas id="lesson01-canvas" style="border: none;" width="500" height="500">
+    </canvas>
+
+    <h3> Radius[0,300] : 
+        <input type="range" min="0" max="300" value="0" step="1" onchange="showValueR(this.value)" />    
+        <span id="radius">0</span>
+    </h3>
+
+    <h3> Angle[0,10] : 
+        <input type="range" min="0" max="10.0" value="0" step="0.1" onchange="showValueA(this.value)" />    
+        <span id="angle">0</span>
+    </h3>    
+
+    <h3>
+        Use mouse change the swirl center.
+    </h3>
+
+    <br/>
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+</body>
+
+</html>

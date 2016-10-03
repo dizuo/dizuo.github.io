@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.14.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.14.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGl6dW8iLCJhIjoiY2lpanRpOHI5MDE1M3Rya242MHBmbXNzdiJ9.wSzfv7ka9iPNAONzafdWxw';
+var map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
+    center: [116.314144, 39.979537], // starting position
+    zoom: 17 // starting zoom
+});
+
+// Define circle options
+// http://leafletjs.com/reference.html#circle
+var circle_options = {
+    color: '#fff',      // Stroke color
+    opacity: 1,         // Stroke opacity
+    weight: 10,         // Stroke weight
+    fillColor: '#000',  // Fill color
+    fillOpacity: 0.6    // Fill opacity
+};
+
+// var circle_one = mapboxgl.circle([116.314144, 39.979537], 20, circle_options).addTo(map);
+
+</script>
+
+</body>
+</html>

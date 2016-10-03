@@ -1,0 +1,89 @@
+<!--doctype html-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="author" content="timeline test">
+	
+	<title>结婚</title>
+	<link rel="stylesheet" href="css/style_v.css" media="screen" />
+	
+	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script-->
+	<script src="js/jquery.min.js.1.7.2.js"> </script>
+	<script src="js/jquery.timelinr-0.9.54.js"></script>
+	<script>
+		$(function(){
+			$().timelinr({
+				orientation: 	'vertical',
+				issuesSpeed: 	300,
+				datesSpeed: 	100,
+				arrowKeys: 		'true',
+				startAt:		7
+			})
+		});
+	</script>
+
+</head>
+
+<body oncontextmenu="return false" ondragstart="return false" onselectstart ="return false" onselect="document.selection.empty()" oncopy="document.selection.empty()" onbeforecopy="return false" onmouseup="document.selection.empty()">
+	
+	<div id="timeline">
+		<ul id="dates">
+			<li><a href="#2008" class="selected">2008</a></li>
+			<li><a href="#2009">2009</a></li>
+			<li><a href="#2010">2010</a></li>
+			<li><a href="#2011">2011</a></li>
+			<li><a href="#2012">2012</a></li>
+			<li><a href="#2013">2013</a></li>
+			<li><a href="#2014">2014</a></li>
+		</ul>
+		<ul id="issues">
+			<li id="2008" class="selected">
+				<img src="images/1.png" width="256" height="256" />
+				<h1>2008</h1>
+				<p>1. 若爱，请深爱。 放弃，请彻底。 等待，本身就是一个错误。</p>
+			</li>
+			<li id="2009">
+				<img src="images/2.png" width="256" height="256" />
+				<h1>2009</h1>
+				<p>2. 看的开一点，伤的就会少一点。</p>
+			</li>
+			<li id="2010">
+				<img src="images/3.png" width="256" height="256" />
+				<h1>2010</h1>
+				<p>3. 许多事情，总是在经历以后才会懂得，一如感情：错过了，遗憾了，才知道其实生活并不需要这么多无谓的执著。</p>
+			</li>
+			<li id="2011">
+				<img src="images/4.png" width="256" height="256" />
+				<h1>2011</h1>
+				<p> 4. 秋天，残忍的季节，成熟不成熟的都要一同收割。一切都会在秋冬交替的刹那间随风而逝，唯有那一泓鲜亮山溪般的记忆永远在我心中哗哗流动...</p>
+			</li>
+			<li id="2012">
+				<img src="images/5.png" width="256" height="256" />
+				<h1>2012</h1>
+				<p>5. 珍惜手边的幸福，不要等到失去以后才悔不当初，也许，你的一生也就只有那么一个人会真正用心在你身上。</p>
+			</li>
+			<li id="2013">
+				<img src="images/6.png" width="256" height="256" />
+				<h1>2013</h1>
+				<p>6. 人生就像一列车，车上总有形形色色的人穿梭往来。你也可能会在车上遇到很多你以为有缘分的人，但是车也会有停下来的时候，总会有人从人生这列车上上下下，当你下去的时候你挥挥手，一转身你能记住的只有回家的路。</p>
+			</li>
+			<li id="2014">
+				<img src="images/7.png" width="256" height="256" />
+				<h1>2014</h1>
+				<p>7. 有的人你看了一辈子，却忽视了一辈子。有的人你看了一眼，却影响到你的一生。有的人热情的为你而快乐，却被你冷落。有的人让你拥有短暂的开心，却得到你思绪的连锁。有的人一厢情愿了N年，却被你拒绝了N年。8. 不要欠朋友太多东西，因为你可能永远都没有机会还他。
+				</p>
+			</li>
+			
+		</ul>
+		<div id="grad_top"></div>
+		<div id="grad_bottom"></div>
+		<a href="#" id="next">+</a>
+		<a href="#" id="prev">-</a>
+	</div>
+
+	<h1> <a href="http://www.csslab.cl/2011/08/18/jquery-timelinr/" title="">任亚飞 潘方方</a></h1>
+	<h2>&copy; 2014 dizuo Lab.tx</h2>
+
+		
+</body>
+</html>

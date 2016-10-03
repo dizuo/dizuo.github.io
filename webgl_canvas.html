@@ -1,0 +1,745 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xmlns:fb="http://ogp.me/ns/fb#" xmlns:addthis="http://www.addthis.com/help/api-spec" >
+
+<head profile="http://gmpg.org/xfn/11">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="pingback" href="http://www.lighthouse3d.com/xmlrpc.php" />
+
+	<title>  WebGL &#8211; Basic Material List from Teapots.c » Lighthouse3d.com</title>
+	<meta name="keywords" content="OpenGL,GLSL,Tutorials,VRML,WebGL,OpenCL,OpenGLES,GLUT" />
+<link rel='shortcut icon' href='http://www.lighthouse3d.com/favicon.ico' />
+<script type="text/javascript">
+	window.google_analytics_uacct = "UA-21952823-1";
+</script>
+<link rel="alternate" type="application/rss+xml" title="Lighthouse3d.com &raquo; Feed" href="http://www.lighthouse3d.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Lighthouse3d.com &raquo; Comments Feed" href="http://www.lighthouse3d.com/comments/feed/" />
+
+            <script type="text/javascript">//<![CDATA[
+            // Google Analytics for WordPress by Yoast v4.3.5 | http://yoast.com/wordpress/google-analytics/
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-21952823-1']);
+				            _gaq.push(['_setCustomVar',1,'post_type','post',3],['_setCustomVar',3,'category','uncategorized',3],['_setCustomVar',4,'categories','uncategorized',3],['_trackPageview']);
+            (function () {
+                var ga = document.createElement('script');
+                ga.type = 'text/javascript';
+                ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(ga, s);
+            })();
+            //]]></script>
+			<link rel="alternate" type="application/rss+xml" title="Lighthouse3d.com &raquo; WebGL &#8211; Basic Material List from Teapots.c Comments Feed" href="http://www.lighthouse3d.com/2014/01/webgl-basic-material-list-from-teapots-c/feed/" />
+<link rel='stylesheet' id='myBeautyStyleSheet-css'  href='http://www.lighthouse3d.com/wp-content/plugins/my-beautiful-tubes/my-beautiful-tubes-style.css?ver=35' type='text/css' media='all' />
+<link rel='stylesheet' id='jetpack-subscriptions-css'  href='http://www.lighthouse3d.com/wp-content/plugins/jetpack/modules/subscriptions/subscriptions.css?ver=3.9.1' type='text/css' media='all' />
+<link rel='stylesheet' id='output-css'  href='http://www.lighthouse3d.com/wp-content/plugins/addthis/css/output.css?ver=3.9.1' type='text/css' media='all' />
+<link rel='stylesheet' id='wordpress-popular-posts-css'  href='http://www.lighthouse3d.com/wp-content/plugins/wordpress-popular-posts/style/wpp.css?ver=2.3.7' type='text/css' media='all' />
+<link rel='stylesheet' id='vye_dynamic-css'  href='http://www.lighthouse3d.com/wp-content/plugins/youtube-embed/css/main.min.css?ver=3.9.1' type='text/css' media='all' />
+<link rel='stylesheet' id='jetpack-widgets-css'  href='http://www.lighthouse3d.com/wp-content/plugins/jetpack/modules/widgets/widgets.css?ver=20121003' type='text/css' media='all' />
+<link rel='stylesheet' id='stbCoreCSS-css'  href='http://www.lighthouse3d.com/wp-content/plugins/wp-special-textboxes/css/stb-core.css?ver=5.0.85' type='text/css' media='all' />
+<link rel='stylesheet' id='stbCSS-css'  href='http://www.lighthouse3d.com/wp-content/plugins/wp-special-textboxes/css/wp-special-textboxes.css.php?ver=5.0.85' type='text/css' media='all' />
+<link rel='stylesheet' id='suffusion-theme-css'  href='http://www.lighthouse3d.com/wp-content/themes/suffusion/style.css?ver=3.8.0' type='text/css' media='all' />
+<link rel='stylesheet' id='suffusion-theme-skin-1-css'  href='http://www.lighthouse3d.com/wp-content/themes/suffusion/skins/light-theme-gray-2/skin.css?ver=3.8.0' type='text/css' media='all' />
+<!--[if gt IE 8]>--><link rel='stylesheet' id='suffusion-rounded-css'  href='http://www.lighthouse3d.com/wp-content/themes/suffusion/rounded-corners.css?ver=3.8.0' type='text/css' media='all' />
+<!--<![endif]-->
+<!--[if lt IE 8]><link rel='stylesheet' id='suffusion-ie-css'  href='http://www.lighthouse3d.com/wp-content/themes/suffusion/ie-fix.css?ver=3.8.0' type='text/css' media='all' />
+<![endif]-->
+<link rel='stylesheet' id='suffusion-generated-css'  href='http://www.lighthouse3d.com?ver=3.8.0&#038;suffusion-css=css' type='text/css' media='all' />
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-includes/js/jquery/jquery.js?ver=1.11.0'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.2.1'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/themes/suffusion/scripts/suffusion.js?ver=3.8.0'></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.lighthouse3d.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://www.lighthouse3d.com/wp-includes/wlwmanifest.xml" /> 
+<link rel='canonical' href='http://www.lighthouse3d.com/2014/01/webgl-basic-material-list-from-teapots-c/' />
+<link rel='shortlink' href='http://wp.me/p1saan-1iX' />
+    <script>
+        (function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    <script type="text/javascript">
+        (function() {
+             var li = document.createElement('script'); li.type = 'text/javascript'; li.async = true;
+             li.src = ('https:' == document.location.protocol ? 'https:' : 'http:') + '//platform.stumbleupon.com/1/widgets.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(li, s);
+        })();
+    </script>
+
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shCore.js'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shAutoloader.js'></script>
+<link type='text/css' rel='stylesheet' href='http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/styles/shCore.css'/>
+<link type='text/css' rel='stylesheet' href='http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/styles/shThemeRDark.css'/>
+<!-- Start Additional Feeds -->
+<!-- End Additional Feeds -->
+<style type="text/css">.broken_link, a.broken_link {
+	text-decoration: line-through;
+}</style>
+<!-- Jetpack Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="WebGL - Basic Material List from Teapots.c" />
+<meta property="og:url" content="http://www.lighthouse3d.com/2014/01/webgl-basic-material-list-from-teapots-c/" />
+<meta property="og:description" content="The Red Book samples included a short demo on OpenGL materials. The demo is quite old but is still valuable when considering the Phong lighting equation. In the original C source file several mater..." />
+<meta property="article:published_time" content="2014-01-24T17:20:35+00:00" />
+<meta property="article:modified_time" content="2014-01-24T19:43:17+00:00" />
+<meta property="article:author" content="http://www.lighthouse3d.com/author/ARF/" />
+<meta property="og:site_name" content="Lighthouse3d.com" />
+<meta property="og:image" content="http://www.lighthouse3d.com/wp-content/uploads/2014/01/teapots-150x150.jpg" />
+<meta name="twitter:site" content="@jetpack" />
+<meta name="twitter:image" content="http://www.lighthouse3d.com/wp-content/uploads/2014/01/teapots-150x150.jpg?w=240" />
+<meta name="twitter:card" content="summary" />
+</head>
+<body class="single single-post postid-5019 single-format-standard">
+        <script type='text/javascript'>
+        //Menu effects
+        var suf_nav_delay = 500;
+        var suf_nav_effect = "fade";
+        var suf_navt_delay = 500;
+        var suf_navt_effect = "none";
+        var suf_jq_masonry_enabled = "disabled";
+    </script>
+
+<!--dizuo begin -->
+
+		<div id="wrapper" class="fix">
+
+			<div id="container" class="fix">
+				    <div id="main-col">
+  	<div id="content">
+
+		<div class="entry-container fix">
+			<div class="entry fix">
+<p><img class="alignleft size-thumbnail wp-image-5020" alt="teapots" src="http://www.lighthouse3d.com/wp-content/uploads/2014/01/teapots-150x150.jpg" width="100" height="100" /> The Red Book samples included a short demo on OpenGL materials. The demo is quite old but is still valuable when considering the Phong lighting equation. In the original <a href="https://www.sgi.com/products/software/opengl/examples/redbook/source/teapots.c" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.sgi.com']);">C source file</a> several materials are defined and the resulting app produces an image such as the icon of this post.</p>
+<p>This post contains a WebGL demo where the different materials can be applied to a model.</p>
+<p><span id="more-5019"></span></p>
+<table>
+<tr>
+<td>
+<canvas id="canvas" width="600" height="400">Your browser does not support the canvas tag.</canvas>
+</td>
+</tr>
+<tr>
+<td>
+Material :<select id="matSelector" name="matSelector"><br />
+	<!--option value="emerald">emerald</option--><br />
+	<!--option value="jade">jade</option--><br />
+	<option value=0>emerald</option><br />
+	<option value=1>jade</option><br />
+	<option value=2>obsidian</option><br />
+	<option value=3>pearl</option><br />
+	<option value=4>ruby</option><br />
+	<option value=5>turquoise</option><br />
+	<option value=6>brass</option><br />
+	<option value=7>bronze</option><br />
+	<option value=8>chrome</option><br />
+	<option value=9>copper</option><br />
+	<option value=10>gold</option><br />
+	<option value=11>silver</option><br />
+	<option value=12>black plastic</option><br />
+	<option value=13>cyan plastic</option><br />
+	<option value=14>green plastic</option><br />
+	<option value=15>red plastic</option><br />
+	<option value=16>white plastic</option><br />
+	<option value=17>yellow plastic</option><br />
+	<option value=18>black rubber</option><br />
+	<option value=19>cyan rubber</option><br />
+	<option value=20>green rubber</option><br />
+	<option value=21>red rubber</option><br />
+	<option value=22>white rubber</option><br />
+	<option value=23>yellow rubber</option><br />
+</select></td>
+</tr>
+<tr>
+<td>
+Ambient: <code id="ambi">(0.0215 ,0.1745 ,0.0215)</code></td>
+</tr>
+<tr>
+<td>
+Diffuse: <code id="diff">(0.07568 ,0.61424 ,0.07568)</code></td>
+</tr>
+<tr>
+<td>
+Specular: <code id="spec">(0.633 ,0.727811 ,0.633)</code></td>
+</tr>
+<tr>
+<td>
+Shininess: <code id="shin">76.8</code></td>
+</tr>
+</table>
+<hr />
+<p>In order to keep the code simpler I wrote a small lib to deal with materials and models (<a href="http://www.lighthouse3d.com/webgl/l3dmodels.js"  >l3dmodels.js</a>). The source code for the javascript bit can be found in <a href="http://www.lighthouse3d.com/webgl/demo.js"  >here</a>. It assumes a canvas named &#8220;canvas&#8221; has been declared in HTML.</p>
+<p>The demo also uses two third party libs:</p>
+<ul>
+<li><a href="https://code.google.com/p/webglsamples/source/browse/book/webgl-utils.js?r=41401f8a69b1f8d32c6863ac8c1953c8e1e8eba0"  onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://code.google.com']);">webgl-utils.js</a></li>
+<li><a href="https://code.google.com/p/glmatrix/source/browse/glMatrix.js"  onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://code.google.com']);">jsMatrix.js</a></li>
+</ul>
+<p>The first library contains two functions which are really useful: WebGLUtils.setupWebGL and window.requestAnimFrame. jsMatrix is a great lib that supports the most common matrix and vector operations, namely in the context of GL, such as setting the projection matrix, placing the camera, and performing geometric transformations.</p>
+<pre hidden>
+<!-- WebGL utils originally from here: https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/demos/common/webgl-utils.js -->
+<script type="text/javascript" src="http://www.lighthouse3d.com/webgl/webgl-utils.js"></script>
+<!-- glMatrix utils originally from here: http://code.google.com/p/glmatrix/source/browse/glMatrix.js -->
+<script type="text/javascript" src="http://www.lighthouse3d.com/webgl/glMatrix.js"></script>
+<!-- lib to ease model and material management -->
+<script type="text/javascript" src="http://www.lighthouse3d.com/webgl/l3dmodels.js"></script><!-- 
+
+Shader programs 
+
+--><!-- simple shader displaying a constant color --><script id="color_vs" type="x-shader/x-vertex">// <![CDATA[
+
+uniform mat4 uMat4PVM;  
+
+attribute vec4 aVec4Position;  
+
+void main()                 
+{
+	gl_Position = uMat4PVM * aVec4Position;
+}
+
+// ]]&gt;</script>
+
+<script id="color_fs" type="x-shader/x-fragment">// <![CDATA[
+precision mediump float;      
+
+uniform vec4 uVec4Diffuse;         
+
+void main()                   
+{
+    gl_FragColor = uVec4Diffuse;
+}
+// ]]&gt;</script>
+
+<!-- Phong shader -->
+<script id="phong_vs" type="x-shader/x-vertex">// <![CDATA[
+
+uniform mat4 uMat4PVM;   
+uniform mat3 uMat3Normal;
+uniform mat4 uMat4ViewModel;
+
+attribute vec4 aVec4Position;  
+attribute vec3 aVec3Normal;
+
+varying vec3 normal;
+varying vec3 eyeCoord;
+
+void main()                 
+{
+
+    normal = normalize(uMat3Normal * aVec3Normal);
+    eyeCoord = -vec3(uMat4ViewModel * aVec4Position);
+
+	gl_Position = uMat4PVM * aVec4Position;
+}
+
+// ]]&gt;</script>
+
+<script id="phong_fs" type="x-shader/x-fragment">// <![CDATA[
+precision mediump float;      
+
+uniform vec3 uVec3LightDir; 
+uniform vec4 uVec4Diffuse;         
+uniform vec4 uVec4Specular;
+uniform float uFloatShininess;
+uniform vec4 uVec4Ambient;
+
+varying vec3 normal;
+varying vec3 eyeCoord;
+
+void main()                   
+{
+    vec4 spec = vec4(0.0);
+
+    vec3 n = normalize(normal);
+    vec3 e = normalize(eyeCoord);
+
+    float intensity = max(dot(n,uVec3LightDir), 0.0);
+
+    if (intensity > 0.0) {
+
+        vec3 h = normalize(uVec3LightDir + e);
+        float intSpec = max(dot(h,n), 0.0);
+        spec = uVec4Specular * pow(intSpec, uFloatShininess);
+    }
+    gl_FragColor = vec4(intensity, intensity, intensity, 1.0) * uVec4Diffuse + spec + uVec4Ambient;  
+}
+// ]]&gt;</script>
+
+<!-- Phong shader with texturing -->
+<script id="phong_texture_vs" type="x-shader/x-vertex">// <![CDATA[
+
+uniform mat4 uMat4PVM;   
+uniform mat3 uMat3Normal;
+uniform mat4 uMat4ViewModel;
+
+attribute vec4 aVec4Position;  
+attribute vec3 aVec3Normal;
+attribute vec2 aVec2TexCoord;
+
+varying vec3 normal;
+varying vec3 eyeCoord;
+varying vec2 tc;
+
+void main()                 
+{
+    tc = aVec2TexCoord;
+    normal = normalize(uMat3Normal * aVec3Normal);
+    eyeCoord = -vec3(uMat4ViewModel * aVec4Position);
+
+	gl_Position = uMat4PVM * aVec4Position;
+}
+
+// ]]&gt;</script>
+
+<script id="phong_texture_fs" type="x-shader/x-fragment">// <![CDATA[
+precision mediump float;      
+
+uniform vec3 uVec3LightDir; 
+uniform vec4 uVec4Diffuse;         
+uniform vec4 uVec4Specular;
+uniform float uFloatShininess;
+uniform vec4 uVec4Ambient;
+
+uniform sampler2D uSamp2DTexID;
+
+varying vec3 normal;
+varying vec3 eyeCoord;
+varying vec2 tc;
+
+void main()                   
+{
+    vec4 spec = vec4(0.0);
+
+    vec3 n = normalize(normal);
+    vec3 e = normalize(eyeCoord);
+
+    float intensity = max(dot(n,uVec3LightDir), 0.0);
+
+    if (intensity > 0.0) {
+
+        vec3 h = normalize(uVec3LightDir + e);
+        float intSpec = max(dot(h,n), 0.0);
+        spec = uVec4Specular * pow(intSpec, uFloatShininess);
+    }
+    vec4 dif = uVec4Diffuse * texture2D(uSamp2DTexID, tc);
+    gl_FragColor = vec4(intensity, intensity, intensity, 1.0) * dif + spec + uVec4Ambient;  
+}
+// ]]&gt;</script>
+
+<script type="text/javascript">// <![CDATA[
+
+/* Reference to the WebGLContext */
+var gl = null;		   
+
+/* Reference to the canvas DOM object. */
+var canvas = null;	 
+
+/* References to the shader programs */
+var phongProgram, colorProgram, phongTexProgram;
+
+// --------------------------------------------------------------------------
+//  Camera variables and helper function
+// --------------------------------------------------------------------------
+var deltaAlpha = 0;
+var deltaBeta = 0;
+var alpha = 2.4, prevAlpha;
+var beta = 0.44, prevBeta;
+var radius = 5, prevRadius;
+var camX, camY, camZ;
+
+function spherical2Cartesian() {
+
+    camX = radius * Math.cos(beta) * Math.sin(alpha);
+    camZ = radius * Math.cos(beta) * Math.cos(alpha);
+    camY = radius * Math.sin(beta)
+}
+
+// --------------------------------------------------------------------------
+//  Storage for the loaded model
+// Models is defined in l3dmodels.js
+// --------------------------------------------------------------------------
+
+var myModel = new Models(), myGrid = new Model(), myAxis = new Models();
+
+// --------------------------------------------------------------------------
+//  Shader stuff
+// --------------------------------------------------------------------------
+
+function createProgram(docVS, docFS, attributes, uniforms) {
+
+    // create the shader handles
+    var vs = gl.createShader(gl.VERTEX_SHADER);
+    var fs = gl.createShader(gl.FRAGMENT_SHADER);
+
+    // get the source code
+    vsSource = document.getElementById(docVS);
+    fsSource = document.getElementById(docFS);
+
+    // set the source
+    gl.shaderSource(vs, vsSource.text);
+    gl.shaderSource(fs, fsSource.text);
+
+    // compile shaders
+    gl.compileShader(vs);
+    gl.compileShader(fs);
+
+    if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) 
+        throw ("Shader Error: " + docVS + ": " + gl.getShaderInfoLog(vs));
+    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+        throw ("Shader Error: " + docFS + ": " + gl.getShaderInfoLog(fs));
+
+    var program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+
+    for (var i = 0; i < attributes.length; ++i) {
+        gl.bindAttribLocation(program, i, attributes[i]);
+    }
+
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        throw ("Program Error: " + gl.getProgramInfoLog(program));
+
+    program.uniforms = {};
+    for (var i = 0; i < uniforms.length; ++i) {
+        program.uniforms[uniforms[i]] = gl.getUniformLocation(program, uniforms[i]);
+    }
+
+    return(program);
+}
+
+// Callback called each time the browser wants us to draw another frame
+function render(time)
+{           	
+    // Clear color and depth buffers
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Place Camera
+    mat4.lookAt(vec3.create([camX, camY, camZ]), vec3.create([0, 0, 0]), vec3.create([0, 1, 0]), Matrices.view);
+
+    // Clear model matrix 
+    mat4.identity(Matrices.model);
+
+    // set phong to be the active program
+    gl.useProgram(phongProgram);
+
+    // compute all derived matrices (normal, viewModel, PVM)
+ //   Matrices.compDerived();
+
+    // set matrices
+//    gl.uniformMatrix4fv(phongProgram.uniforms["uMat4ViewModel"], false, Matrices.getVM());
+//    gl.uniformMatrix3fv(phongProgram.uniforms["uMat3Normal"], false, Matrices.getN());
+//    gl.uniformMatrix4fv(phongProgram.uniforms["uMat4PVM"], false, Matrices.getPVM());
+
+    // set the light direction uniform
+    var uVec3LightDir = [1.0, -0.5, -1.0,0.0];
+    var res2 = vec3.create();
+    mat4.multiplyVec4(Matrices.view, uVec3LightDir, res2);
+    vec3.normalize(res2);
+    gl.uniform3fv(phongProgram.uniforms["uVec3LightDir"], res2);
+
+    myAxis.render();
+    myModel.render();
+
+    // set the textured phong program as active
+    gl.useProgram(phongProgram);
+
+    // set the matrices
+//    gl.uniformMatrix4fv(phongTexProgram.uniforms["uMat4PVM"], false, Matrices.getPVM());
+//    gl.uniformMatrix4fv(phongTexProgram.uniforms["uMat4ViewModel"], false, Matrices.getVM());
+//    gl.uniformMatrix3fv(phongTexProgram.uniforms["uMat3Normal"], false, Matrices.getN());
+    // set the light dir
+    gl.uniform3fv(phongProgram.uniforms["uVec3LightDir"], res2);
+
+    // render the loaded model
+    // note: if the model has no texture use phongProgram instead
+
+    // set the color program as active
+    gl.useProgram(colorProgram);
+
+    // set the matrix
+ //   gl.uniformMatrix4fv(colorProgram.uniforms["uMat4PVM"], false, Matrices.getPVM());
+
+    // render the grid
+    myGrid.render();
+
+    // just checking
+    checkError();
+
+    // Send the commands to WebGL
+    gl.flush();
+
+    // Request another frame
+    window.requestAnimFrame(render, canvas);
+}
+
+function checkError()
+{
+    var error = gl.getError();
+
+    if (error) 
+        console.log("error: " + error);
+}
+
+// --------------------------------------------------------------------------
+//  Mouse and Keyboard handlers
+// --------------------------------------------------------------------------
+
+var mouseTracking = -1, startX, startY;
+
+function handleKeyDown(event) {
+
+    switch (String.fromCharCode(event.keyCode)) {
+        case "A": alpha -= 0.05; break;
+        case "D": alpha += 0.05; break;
+        case "W": beta += 0.05; if (beta > 1.5) beta = 1.5; break;
+        case "S": beta -= 0.05; if (beta < -1.5) beta = -1.5; break;
+        case "R": radius += 0.05; break;
+        case "F": radius -= 0.05; if (radius < 0.5) radius = 0.5; break;
+    }
+    spherical2Cartesian();
+}
+
+function handleMouseDown(event) {
+    if (event.button == 0) // left button
+        mouseTracking = 0;
+    else if (event.button == 1)
+        mouseTracking = 1;
+    startX = event.clientX;
+    startY = event.clientY;
+    prevAlpha = alpha;
+    prevBeta = beta;
+    prevRadius = radius;
+}
+
+function handleMouseUp(event) {
+    mouseTracking = -1;
+}
+
+function handleMouseMove(event) {
+
+    if (mouseTracking == -1) {
+        return;
+    }
+    var xx = event.clientX;
+    var yy = event.clientY;
+    var deltaX = -xx + startX;
+    var deltaY = yy - startY;
+    if (mouseTracking == 0) {
+        alpha = prevAlpha + deltaX * 0.01;
+        beta = prevBeta + deltaY * 0.01;
+        if (beta > 1.5)
+            beta = 1.5;
+        if (beta < -1.5)
+            beta = -1.5;
+    }
+    else if (mouseTracking == 1) {
+        radius = prevRadius - deltaY*0.01;
+    }
+    spherical2Cartesian();
+
+}
+
+// --------------------------------------------------------------------------
+//  Init GL settings, programs and models
+// --------------------------------------------------------------------------
+
+//Called when we have the context
+function init() {
+
+    // init cam variables;
+    spherical2Cartesian();
+
+    // set the viewport to be the whole canvas
+    gl.viewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+    // projection matrix. 
+    var ratio = canvas.clientWidth / canvas.clientHeight;
+    mat4.perspective(60, ratio, 0.1, 50, Matrices.proj);
+
+    // Set the background clear color to gray.
+    gl.clearColor(0.8, 0.8, 0.8, 1.0);
+    // general gl settings
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
+
+    // create the shader programs
+    phongProgram = createProgram("phong_vs", "phong_fs",
+        ["aVec4Position", "aVec3Normal"],
+        ["uMat4PVM", "uMat3Normal", "uMat4ViewModel", "uVec3LightDir", "uVec4Diffuse", "uVec4Specular", "uFloatShininess", "uVec4Ambient"]);
+
+    colorProgram = createProgram("color_vs", "color_fs",
+        ["aVec4Position"],
+        ["uMat4PVM", "uVec4Diffuse"]);
+
+    phongTexProgram = createProgram("phong_texture_vs", "phong_texture_fs",
+         ["aVec4Position", "aVec3Normal", "aVec2TexCoord"],
+        ["uMat4PVM", "uMat3Normal", "uMat4ViewModel", "uSamp2DTexID", "uVec3LightDir", "uVec4Diffuse", "uVec4Specular", "uFloatShininess", "uVec4Ambient" ]);
+
+    // init the matrices
+    Matrices.init();
+
+    // init the models for rendering
+    var myGridMat = new Material();
+    myGridMat.diffuse = new Float32Array([1.0, 1.0, 1.0, 1.0]);
+    myGrid = createGrid(1, 3, 12);
+    myGrid.setMaterial(myGridMat);
+    myAxis = createAxis(3);
+    myModel = Models.loadModel("http://www.lighthouse3d.com/webgl/bench1mat.json");
+	myModel.setMaterialColor(1);
+    // just in case
+    checkError();
+}
+
+// --------------------------------------------------------------------------
+//  Main function
+// --------------------------------------------------------------------------
+
+function main()
+{		
+    // Try to get a WebGL context    
+    canvas = document.getElementById("canvas");    
+
+    gl = WebGLUtils.setupWebGL(canvas, { depth: true });
+
+    if (gl != null)
+    {
+        // init gl stuff
+        init();
+
+        // handlers for keyboard and mouse
+        document.onkeydown = handleKeyDown;
+        canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+
+        // rendering callback
+        window.requestAnimFrame(render, canvas);
+    }
+}
+
+// call the main entry point
+main();
+
+var choice_combo = document.getElementById('matSelector');
+choice_combo.onchange = function() {
+
+	var i = this.value;
+	myModel.setMaterialColor(i);
+	document.getElementById("ambi").innerHTML = "("+ colors[i][0] + ", " + colors[i][1] + ", " + colors[i][2] + ")";
+	document.getElementById("diff").innerHTML = "("+ colors[i][3] + ", " + colors[i][4] + ", " + colors[i][5] + ")";
+	document.getElementById("spec").innerHTML = "("+ colors[i][6] + ", " + colors[i][7] + ", " + colors[i][8] + ")";
+	document.getElementById("shin").innerHTML = colors[i][9];
+}
+// ]]&gt;</script></pre>
+<div class="addthis_toolbox addthis_default_style addthis_" addthis:url='http://www.lighthouse3d.com/2014/01/webgl-basic-material-list-from-teapots-c/' addthis:title='WebGL &#8211; Basic Material List from Teapots.c ' ><a class="addthis_button_facebook"></a><a class="addthis_button_twitter"></a><a class="addthis_button_email"></a><a class="addthis_button_pinterest_share"></a><a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a></div>			</div><!--/entry -->
+		</div><!-- .entry-container -->			       
+
+</div>
+
+	<div id="cred">
+		<table>
+			<tr>
+				<td class="cred-left">&#169; 2014 <a href='http://www.lighthouse3d.com'>Lighthouse3d.com</a></td>
+				<td class="cred-center"></td>
+				<td class="cred-right"><a href="http://www.aquoid.com/news/themes/suffusion/">Suffusion theme by Sayontan Sinha</a></td>
+			</tr>
+		</table>
+	</div>
+		<!-- 283 queries, 47MB in 1.523 seconds. -->
+	</div><!--/wrapper -->
+
+<!--dizuo end -->
+
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/si-captcha-for-wordpress/captcha/si_captcha.js?ver=1.0'></script>
+<script type="text/javascript">
+//<![CDATA[
+var si_captcha_styles = "\
+<!-- begin SI CAPTCHA Anti-Spam - comment form style -->\
+<style type='text/css'>\
+div#captchaImgDiv { display:block; }\
+.captchaSizeDivSmall { width:175px; height:45px; padding-top:10px; }\
+.captchaSizeDivLarge { width:250px; height:60px; padding-top:10px; }\
+img#si_image_com,#si_image_reg,#si_image_log,#si_image_side_login { border-style:none; margin:0; padding-right:5px; float:left; }\
+.captchaImgRefresh { border-style:none; margin:0; vertical-align:bottom; }\
+div#captchaInputDiv { display:block; padding-top:15px; padding-bottom:5px; }\
+label#captcha_code_label { margin:0; }\
+input#captcha_code { width:65px; }\
+</style>\
+<!-- end SI CAPTCHA Anti-Spam - comment form style -->\
+";
+jQuery(document).ready(function($) {
+$('head').append(si_captcha_styles);
+});
+//]]>
+</script>
+<script type='text/javascript'>
+  SyntaxHighlighter.autoloader(
+      'applescript            http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushAppleScript.js',
+      'actionscript3 as3      http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushAS3.js',
+      'bash shell             http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushBash.js',
+      'coldfusion cf          http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushColdFusion.js',
+      'cpp c                  http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushCpp.js',
+      'c# c-sharp csharp      http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushCSharp.js',
+      'css                    http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushCss.js',
+      'delphi pascal          http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushDelphi.js',
+      'diff patch pas         http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushDiff.js',
+      'erl erlang             http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushErlang.js',
+      'groovy                 http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushGroovy.js',
+      'hive                   http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushHive.js',
+      'java                   http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushJava.js',
+      'jfx javafx             http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushJavaFX.js',
+      'js jscript javascript  http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushJScript.js',
+      'objc obj-c             http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushObjectiveC.js',
+      'perl pl                http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushPerl.js',
+      'php                    http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushPhp.js',
+      'pig                    http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushPig.js',
+      'text plain             http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushPlain.js',
+      'py python              http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushPython.js',
+      'ruby rails ror rb      http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushRuby.js',
+      'sass scss              http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushSass.js',
+      'scala                  http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushScala.js',
+      'sql                    http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushSql.js',
+      'vb vbnet               http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushVb.js',
+      'xml xhtml xslt html    http://www.lighthouse3d.com/wp-content/plugins/syntax-highlighter-mt/scripts/shBrushXml.js'
+       );
+	SyntaxHighlighter.all();
+</script>
+	<div style="display:none">
+	</div>
+<script type="text/javascript">
+var addthis_options = "facebook,delicious,twitter,google";
+var addthis_config = {"data_track_clickback":true,"data_track_addressbar":false,"data_track_textcopy":false,"ui_atversion":"300"};
+var addthis_product = 'wpp-3.5.9';
+</script><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4d783030125f44ed"></script><script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/my-beautiful-tubes/js/btwu.js?ver=1.0.1'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-includes/js/comment-reply.min.js?ver=3.9.1'></script>
+<script type='text/javascript' src='http://s0.wp.com/wp-content/js/devicepx-jetpack.js?ver=201422'></script>
+<script type='text/javascript' src='http://s.gravatar.com/js/gprofiles.js?ver=2014Mayaa'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var WPGroHo = {"my_hash":""};
+/* ]]> */
+</script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/jetpack/modules/wpgroho.js?ver=3.9.1'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-includes/js/jquery/ui/jquery.ui.effect.min.js?ver=1.10.4'></script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-includes/js/jquery/ui/jquery.ui.effect-blind.min.js?ver=1.10.4'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var stbUserOptions = {"mode":"css","cssOptions":{"roundedCorners":true,"mbottom":10,"imgHide":"http:\/\/www.lighthouse3d.com\/wp-content\/plugins\/wp-special-textboxes\/images\/minus.png","imgShow":"http:\/\/www.lighthouse3d.com\/wp-content\/plugins\/wp-special-textboxes\/images\/plus.png","strHide":"Hide","strShow":"Show"}};
+/* ]]> */
+</script>
+<script type='text/javascript' src='http://www.lighthouse3d.com/wp-content/plugins/wp-special-textboxes/js/wstb.min.js?ver=5.0.85'></script>
+
+	<script src="http://stats.wordpress.com/e-201422.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	st_go({v:'ext',j:'1:2.9.3',blog:'21488603',post:'5019',tz:'0'});
+	var load_cmc = function(){linktracker_init(21488603,5019,2);};
+	if ( typeof addLoadEvent != 'undefined' ) addLoadEvent(load_cmc);
+	else load_cmc();
+	</script><!--wp_footer-->
+</body>
+</html>

@@ -1,0 +1,351 @@
+<html>
+
+<!-- Fake Circle (GLSL) -->
+
+<!--  
+Create-20150907_1441 :
+http://www.geeks3d.com/20130705/shader-library-circle-disc-fake-sphere-in-glsl-opengl-glslhacker/2/
+-->
+
+<head>
+<title>GPU Image Processing</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    
+	varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
+
+	uniform float rt_w;    // window width
+    uniform float rt_h;    // window height
+    uniform float vx_offset;	// texture coordinate, [0.0, 1.0]
+    
+    uniform float pixel_w;
+	uniform float pixel_h;
+
+    void main(void) 
+    {
+        vec2 uv = vTextureCoord.st;
+
+        vec3 tc = vec3(1.0, 0.0, 0.0);				// [vs_offset-0.01, vx_offset+0.01)	is red ribbon
+
+        if (uv.x < (vx_offset-0.005))
+        {
+            float dx = pixel_w * (1. / rt_w);
+			float dy = pixel_h * (1. / rt_h);
+			vec2 coord = vec2(dx * floor(uv.x / dx),  dy * floor(uv.y / dy));
+			tc = texture2D(uSampler, coord).rgb;
+        }
+        else if (uv.x >= (vx_offset+0.005))
+        {
+            tc = texture2D(uSampler, uv).rgb;
+        }
+
+        gl_FragColor = vec4(tc, 1.0);
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord; 
+
+    uniform mat4 uMVMatrix; 
+    uniform mat4 uPMatrix;
+
+	varying vec2 vTextureCoord;    // pass to fragment shader.
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    var gl;
+    function initGL(canvas) {
+        try {
+            gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+
+        // alert("initGL");
+    }
+
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    var shaderProgram;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+
+        shaderProgram.widthUniform = gl.getUniformLocation(shaderProgram, "rt_w");
+        shaderProgram.heightUniform = gl.getUniformLocation(shaderProgram, "rt_h");
+        shaderProgram.vxOffsetUniform = gl.getUniformLocation(shaderProgram, "vx_offset");
+		shaderProgram.pixelWUniform = gl.getUniformLocation(shaderProgram, "pixel_w");
+		shaderProgram.pixelHUniform = gl.getUniformLocation(shaderProgram, "pixel_h");
+		
+    }
+
+    function handleLoadedTexture(texture) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    var textureObj;
+
+    function initTexture() {
+        textureObj = gl.createTexture();
+        textureObj.image = new Image();
+
+        textureObj.image.onload = function () {
+            handleLoadedTexture(textureObj)
+        }
+
+        // textureObj.image.src = "res/disturb.jpg";	// For debug in company.
+        // textureObj.image.src = "res/vampbeauty_02.jpg";
+		textureObj.image.src = "res/bkg.jpg";
+    }
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
+    function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    }
+
+	var vxOffset = 0.0;
+	var pixel_w = 3.0;
+	var pixel_h = 3.0;
+	
+    function setOtherUniforms() {
+        gl.uniform1f(shaderProgram.widthUniform, gl.viewportWidth);
+        gl.uniform1f(shaderProgram.heightUniform, gl.viewportHeight);
+ 
+        console.log("%f, %f", gl.viewportWidth, gl.viewportHeight);
+
+        // vec2(400.0, 300.0)
+        gl.uniform1f(shaderProgram.vxOffsetUniform, vxOffset);		// 0.5
+		gl.uniform1f(shaderProgram.pixelWUniform, pixel_w);
+		gl.uniform1f(shaderProgram.pixelHUniform, pixel_h);
+
+        // gl.uniform1f(shaderProgram.angle, 2.8);  // This case will not report error, but ....
+     }
+
+    var squareVertexPositionBuffer;
+    var squareVertexTexCoordBuffer;
+
+    function initBuffers() {
+        var width = gl.viewportWidth;
+        var height = gl.viewportHeight;
+        squareVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        vertices = [
+            width, height, 0.0,
+            0, height, 0.0,
+            width, 0.0, 0.0,
+            0.0, 0.0, 0.0
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        squareVertexPositionBuffer.itemSize = 3;    // 一个顶点3个float
+        squareVertexPositionBuffer.numItems = 4;    // 一个四边形四个顶点
+
+        squareVertexTexCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        texCoords = [
+            1.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+        squareVertexTexCoordBuffer.itemSize = 2;
+        squareVertexTexCoordBuffer.numItems = 4;
+    }
+
+    var xTran = 0;
+
+    function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.ortho(0, gl.viewportWidth, 0, gl.viewportHeight, 0, 100, pMatrix);
+
+        mat4.identity(mvMatrix);
+        // mat4.translate(mvMatrix, [xTran-50, 0.0, 0.0]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, squareVertexTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textureObj);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+        setMatrixUniforms();
+        setOtherUniforms();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+    }
+
+    function tick()
+    {
+        requestAnimFrame(tick);
+        drawScene();
+        // animate();
+    }
+
+    var lastTime = 0;
+    function animate()
+    {
+        var timeNow = new Date().getTime();
+        if (lastTime != 0)
+        {
+            var elapsed = timeNow - lastTime;
+            var delay = 2000.0;
+
+            xTran = (xTran + 0.2) % 100;
+        }
+
+        lastTime = timeNow;
+    }
+
+    function webGLStart() {
+        var canvas = document.getElementById("lesson01-canvas");
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.TEXTURE_2D);
+
+        // drawScene();
+        tick();
+    }
+	
+	function changeOffsetValue(newValue)
+	{	
+		document.getElementById("offset").innerHTML=newValue;
+		vxOffset = newValue / 512.0;
+		// drawScene();
+	}
+	
+	function changePixelwValue(newValue)
+	{
+		document.getElementById("pixelw").innerHTML=newValue;
+		pixel_w = newValue;
+	}
+
+	function changePixelhValue(newValue)
+	{
+		document.getElementById("pixelh").innerHTML=newValue;
+		pixel_h = newValue;
+	}
+	
+</script>
+
+</head>
+
+
+<body onload="webGLStart();">
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+
+    <canvas id="lesson01-canvas" style="border: none;" width="512" height="512"></canvas>
+	
+	<p>Change the offset : 	
+	<input type="range" min="0" max="512" value="0" step="1" onchange="changeOffsetValue(this.value)" />	
+	<span id="offset">0</span>	
+	</p>
+	
+	<p>Change the pixel_w : 	
+	<input type="range" min="3" max="50" value="3" step="1" onchange="changePixelwValue(this.value)" />	
+	<span id="pixelw">3</span>	
+	</p>
+	
+	<p>Change the pixel_h : 	
+	<input type="range" min="3" max="50" value="3" step="1" onchange="changePixelhValue(this.value)" />	
+	<span id="pixelh">3</span>	
+	</p>
+	
+	<br/>
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+</body>
+
+</html>

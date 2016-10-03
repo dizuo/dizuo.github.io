@@ -1,0 +1,63 @@
+<html>
+
+<script language="javascript" type="text/javascript">
+
+function on_start() {
+var content = '\
+2015-08-31 至 2015-08-31	夜间交通费	第三极到石景山公交六场宿舍	51.00	\
+2015-09-01 至 2015-09-01	夜间交通费	第三极到石景山公交六场宿舍	51.00	\
+2015-09-02 至 2015-09-02	夜间交通费	第三极到石景山公交六场宿舍	58.00	\
+2015-09-07 至 2015-09-07	夜间交通费	第三极到石景山公交六场宿舍	53.00	\
+2015-09-08 至 2015-09-08	夜间交通费	第三极到石景山公交六场宿舍	52.00	\
+2015-09-09 至 2015-09-09	夜间交通费	第三极到石景山公交六场宿舍	52.00	\
+2015-09-10 至 2015-09-10	夜间交通费	第三极到石景山公交六场宿舍	54.00	\
+2015-09-11 至 2015-09-11	夜间交通费	第三极到石景山公交六场宿舍	64.00	\
+2015-09-12 至 2015-09-12	夜间交通费	第三极到石景山公交六场宿舍（周六）	55.00	\
+2015-09-14 至 2015-09-14	夜间交通费	第三极到石景山公交六场宿舍'
+	
+	var strs = new Array();
+	strs = content.split('\t');
+	for (i = 0; i < strs.length; i++)
+	{
+		if (i % 2 == 0) {
+			console.log("[%d] %s\n", i, strs[i]);
+		}
+	}
+
+	var dic3 = { "zs":1, "ls":2, "ww":3 };
+    if (dic3["zs"] == 1) {
+		alert("right");
+	} else {
+		alert("wrong");
+	}
+		
+}
+
+function readSingleFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    displayContents(contents);
+  };
+  reader.readAsText(file);
+}
+
+function displayContents(contents) {
+  var element = document.getElementById('file-content');
+  element.innerHTML = contents;
+}
+  
+</script>
+
+<body onload="on_start();">
+
+<h3>Contents of the file:</h3>
+<pre id="file-content"></pre>
+
+</body>
+  
+</html>

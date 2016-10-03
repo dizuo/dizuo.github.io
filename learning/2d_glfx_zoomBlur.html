@@ -1,0 +1,371 @@
+<html>
+
+<!--Render an image with 2D ortho projection -->
+
+<!-- 
+Finish ZoomBlur demo : http://evanw.github.io/glfx.js/demo/
+
+-->
+
+<head>
+<title>ZoomBlur</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
+	uniform vec2 texSize;
+    uniform float strength;
+    uniform vec2 center; 
+	
+    float random(vec3 scale, float seed) {
+        /* use the fragment position for a different seed per-pixel */
+        return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);
+    }
+
+    void main(void) 
+    {
+        vec4 color = vec4(0,0,0,0);
+        float total = 0.0;
+        vec2 toCenter = center - vTextureCoord * texSize;
+        float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);
+
+        for (float t = 0.0; t <= 40.0; t++) 
+        {
+            float percent = (t + offset) / 40.0;
+            float weight = 4.0 * (percent - percent * percent);
+            vec4 sample = texture2D(uSampler, vTextureCoord + toCenter * percent * strength / texSize);
+            
+            /* switch to pre-multiplied alpha to correctly blur transparent images */
+            sample.rgb *= sample.a;
+            
+            color += sample * weight;
+            total += weight;
+        }
+        
+        gl_FragColor = color / total;
+        
+        /* switch back from pre-multiplied alpha */
+        gl_FragColor.rgb /= gl_FragColor.a + 0.00001;
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord; 
+
+    uniform mat4 uMVMatrix; 
+    uniform mat4 uPMatrix;
+
+	varying vec2 vTextureCoord;    // pass to fragment shader.
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    var gl;
+    function initGL(canvas) {
+        try {
+            gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+
+        // alert("initGL");
+    }
+
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+
+    var shaderProgram;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+        shaderProgram.strengthUniform = gl.getUniformLocation(shaderProgram, "strength");
+        shaderProgram.centerUniform = gl.getUniformLocation(shaderProgram, "center");
+        shaderProgram.texSizeUniform = gl.getUniformLocation(shaderProgram, "texSize");
+    }
+
+    function handleLoadedTexture(texture) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    var textureObj;
+
+    function initTexture() {
+        textureObj = gl.createTexture();
+        textureObj.image = new Image();
+
+        textureObj.image.onload = function () {
+            handleLoadedTexture(textureObj)
+        }
+
+        textureObj.image.src = "crate.gif";
+    }
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
+    function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    }
+
+    var centerX = 250.0;
+    var centerY = 250.0;
+    var strength = 0.0;
+
+    function setOtherUniforms() 
+    {
+        //console.log("%d, %d, %d, %d", gl.viewportWidth, gl.viewportHeight, textureObj.image.width, textureObj.image.height);
+
+        gl.uniform2f(shaderProgram.centerUniform, centerX, centerY);
+        gl.uniform2f(shaderProgram.texSizeUniform, gl.viewportWidth, gl.viewportWidth);
+        gl.uniform1f(shaderProgram.strengthUniform, strength);
+     }
+
+    var squareVertexPositionBuffer;
+    var squareVertexTexCoordBuffer;
+
+    function initBuffers() {
+        var width = gl.viewportWidth;
+        var height = gl.viewportHeight;
+        squareVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        vertices = [
+            width, height, 0.0,
+            0, height, 0.0,
+            width, 0.0, 0.0,
+            0.0, 0.0, 0.0
+
+            //width/2.0, height/2.0, 0.0,
+            //-width/2.0, height/2.0, 0.0,
+            //width/2.0, -height/2.0, 0.0,
+            //-width/2.0, -height/2.0, 0.0
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        squareVertexPositionBuffer.itemSize = 3;    // 一个顶点3个float
+        squareVertexPositionBuffer.numItems = 4;    // 一个四边形四个顶点
+
+        squareVertexTexCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        texCoords = [
+            1.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+        squareVertexTexCoordBuffer.itemSize = 2;
+        squareVertexTexCoordBuffer.numItems = 4;
+
+    }
+
+    var xTran = 0;
+
+    function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.ortho(0, gl.viewportWidth, 0, gl.viewportHeight, 0, 100, pMatrix);
+
+        mat4.identity(mvMatrix);
+        // mat4.translate(mvMatrix, [xTran-50, 0.0, 0.0]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, squareVertexTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textureObj);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+        setMatrixUniforms();
+        setOtherUniforms();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+    }
+
+    function tick()
+    {
+        requestAnimFrame(tick);
+        drawScene();
+        // animate();
+    }
+
+    var lastTime = 0;
+    function animate()
+    {
+        var timeNow = new Date().getTime();
+        if (lastTime != 0)
+        {
+            var elapsed = timeNow - lastTime;
+            var delay = 2000.0;
+
+            xTran = (xTran + 0.2) % 100;
+        }
+
+        lastTime = timeNow;
+    }
+
+    function webGLStart() {
+        var canvas = document.getElementById("lesson01-canvas");
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.TEXTURE_2D);
+
+        // drawScene();
+        tick();
+
+        canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+    }
+
+    // For UI callback
+    function ChangeStrength(newValue)
+    {   
+        document.getElementById("strength").innerHTML = newValue;
+        strength = newValue;
+    }
+
+    var mouseTracking = -1;
+
+    function handleMouseDown(event) 
+    {
+        if (event.button == 0)
+        {
+            mouseTracking = 0;
+
+            centerX = event.clientX;
+            centerY = gl.viewportHeight - event.clientY;
+
+            console.log("xxoo");
+        }
+    }
+
+    function handleMouseUp(event) 
+    {
+        mouseTracking = -1;
+    }
+
+    function handleMouseMove(event) 
+    {
+        if (mouseTracking == -1) {
+            return;
+        }
+
+        centerX = event.clientX;
+        centerY = gl.viewportHeight - event.clientY;
+    }
+
+
+</script>
+
+
+</head>
+
+
+<body onload="webGLStart();">
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+
+    <canvas id="lesson01-canvas" style="border: none;" width="500" height="500"></canvas>
+
+    <h3> Strength [0.0, 1.0]:
+        <input type="range" min="0" max="1.0" value="0" step="0.01" onchange="ChangeStrength(this.value)" />    
+        <span id="strength">0</span>
+    </h3>
+
+    <h3>
+        Use your mouse to change the ZoomBlur center.
+    </h3>
+
+    <br/>
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+</body>
+
+</html>

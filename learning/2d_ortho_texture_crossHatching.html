@@ -1,0 +1,425 @@
+<html>
+
+<!--Render an image with 2D ortho projection -->
+
+<!--  
+Finish-20140626_1716 : 3. http://www.geeks3d.com/20110219/shader-library-crosshatching-glsl-filter/
+
+TODO: This demo has some problem, not perfect.
+
+-->
+
+<head>
+<title>GPU Image Processing</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
+
+	uniform float rt_w;    // window width
+    uniform float rt_h;    // window height
+    uniform float vx_offset;	// texture coordinate, [0.0, 1.0]
+
+    uniform float hatch_y_offset;   // 5.0
+    uniform float lum_threshold_1;  // 1.0
+    uniform float lum_threshold_2;  // 0.7
+    uniform float lum_threshold_3;  // 0.5
+    uniform float lum_threshold_4;  // 0.3
+
+    void main(void) 
+    {
+        vec2 uv = vTextureCoord.st;
+        vec3 tc = vec3(1.0, 0.0, 0.0);
+        float GridPixelSize = 10.0;     // Grid size 10 pixels.
+
+        if (uv.x < (vx_offset - 0.005))
+        {
+            float lum = length( texture2D(uSampler, uv).rgb );
+            tc = vec3(1.0, 1.0, 1.0);
+
+            if (lum < lum_threshold_1)
+            {
+                if ( mod(gl_FragCoord.x + gl_FragCoord.y, GridPixelSize) == 0.0 ) 
+                {
+                    tc = vec3(0.0, 0.0, 0.0);
+                }
+            }
+
+            if (lum < lum_threshold_2)
+            {
+                if ( mod(gl_FragCoord.x - gl_FragCoord.y, GridPixelSize) == 0.0 )
+                {
+                    tc = vec3(0.0, 0.0, 0.0);
+                }
+            }
+
+            if (lum < lum_threshold_3)
+            {
+                if ( mod(gl_FragCoord.x + gl_FragCoord.y - hatch_y_offset, GridPixelSize) == 0.0 )
+                {
+                    tc = vec3(0.0, 0.0, 0.0);
+                }
+            }
+
+            if (lum < lum_threshold_4)
+            {
+                if ( mod(gl_FragCoord.x - gl_FragCoord.y - hatch_y_offset, GridPixelSize) == 0.0 )
+                {
+                    tc = vec3(0.0, 0.0, 0.0);
+                }
+            }
+        }
+        else if (uv.x >= (vx_offset + 0.005))
+        {
+            tc = texture2D(uSampler, uv).rgb;
+        }
+
+        gl_FragColor = vec4(tc, 1.0);
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord; 
+
+    uniform mat4 uMVMatrix; 
+    uniform mat4 uPMatrix;
+
+	varying vec2 vTextureCoord;    // pass to fragment shader.
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    var gl;
+    function initGL(canvas) {
+        try {
+            gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+
+        // alert("initGL");
+    }
+
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    var shaderProgram;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+
+        shaderProgram.widthUniform = gl.getUniformLocation(shaderProgram, "rt_w");
+        shaderProgram.heightUniform = gl.getUniformLocation(shaderProgram, "rt_h");
+        shaderProgram.vxOffsetUniform = gl.getUniformLocation(shaderProgram, "vx_offset");
+
+        shaderProgram.hatchYOffUniform = gl.getUniformLocation(shaderProgram, "hatch_y_offset");
+        shaderProgram.lumThresh1Uniform = gl.getUniformLocation(shaderProgram, "lum_threshold_1");
+        shaderProgram.lumThresh2Uniform = gl.getUniformLocation(shaderProgram, "lum_threshold_2");
+        // ### Pay attention to spelling error. ####
+        // shaderProgram.lumThrssh2Uniform = gl.getUniformLocation(shaderProgram, "lum_threshold_2");
+        shaderProgram.lumThresh3Uniform = gl.getUniformLocation(shaderProgram, "lum_threshold_3");
+        shaderProgram.lumThresh4Uniform = gl.getUniformLocation(shaderProgram, "lum_threshold_4");
+    }
+
+    function handleLoadedTexture(texture) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    var textureObj;
+
+    function initTexture() {
+        textureObj = gl.createTexture();
+        textureObj.image = new Image();
+
+        textureObj.image.onload = function () {
+            handleLoadedTexture(textureObj)
+        }
+
+        textureObj.image.src = "res/head.jpg";	// For debug in company.        
+    }
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
+    function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    }
+
+	var vxOffset = 0.0;
+    var hatchYOffset = 5.0;
+    var lumThreshold1 = 1.0;
+    var lumThreshold2 = 0.7;
+    var lumThreshold3 = 0.5;
+    var lumThreshold4 = 0.3;
+	
+    function setOtherUniforms() {
+        gl.uniform1f(shaderProgram.widthUniform, gl.viewportWidth);
+        gl.uniform1f(shaderProgram.heightUniform, gl.viewportHeight);
+ 
+        console.log("%f, %f", gl.viewportWidth, gl.viewportHeight);
+
+        gl.uniform1f(shaderProgram.vxOffsetUniform, vxOffset);		// 0.5	
+        gl.uniform1f(shaderProgram.hatchYOffUniform, hatchYOffset);
+        gl.uniform1f(shaderProgram.lumThresh1Uniform, lumThreshold1);
+        gl.uniform1f(shaderProgram.lumThresh2Uniform, lumThreshold2);
+        gl.uniform1f(shaderProgram.lumThresh3Uniform, lumThreshold3);
+        gl.uniform1f(shaderProgram.lumThresh4Uniform, lumThreshold4);
+
+        // gl.uniform1f(shaderProgram.angle, 2.8);  // This case will not report error, but ....
+     }
+
+    var squareVertexPositionBuffer;
+    var squareVertexTexCoordBuffer;
+
+    function initBuffers() {
+        var width = gl.viewportWidth;
+        var height = gl.viewportHeight;
+        squareVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        vertices = [
+            width, height, 0.0,
+            0, height, 0.0,
+            width, 0.0, 0.0,
+            0.0, 0.0, 0.0
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        squareVertexPositionBuffer.itemSize = 3;    // 一个顶点3个float
+        squareVertexPositionBuffer.numItems = 4;    // 一个四边形四个顶点
+
+        squareVertexTexCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        texCoords = [
+            1.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+        squareVertexTexCoordBuffer.itemSize = 2;
+        squareVertexTexCoordBuffer.numItems = 4;
+    }
+
+    var xTran = 0;
+
+    function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.ortho(0, gl.viewportWidth, 0, gl.viewportHeight, 0, 100, pMatrix);
+
+        mat4.identity(mvMatrix);
+        // mat4.translate(mvMatrix, [xTran-50, 0.0, 0.0]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexTexCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, squareVertexTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textureObj);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+        setMatrixUniforms();
+        setOtherUniforms();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+    }
+
+    function tick()
+    {
+        requestAnimFrame(tick);
+        drawScene();
+        // animate();
+    }
+
+    var lastTime = 0;
+    function animate()
+    {
+        var timeNow = new Date().getTime();
+        if (lastTime != 0)
+        {
+            var elapsed = timeNow - lastTime;
+            var delay = 2000.0;
+
+            xTran = (xTran + 0.2) % 100;
+        }
+
+        lastTime = timeNow;
+    }
+
+    function webGLStart() {
+        var canvas = document.getElementById("lesson01-canvas");
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        // gl.enable(gl.TEXTURE_2D);  // ERROR 
+
+        // drawScene();
+        tick();
+    }
+	
+	function showValueXOff(newValue)
+	{	
+		document.getElementById("xoff").innerHTML=newValue;
+		vxOffset = newValue;
+	}
+
+    function showValueYOff(newValue)
+    {
+        document.getElementById("yoff").innerHTML=newValue;
+        hatchYOffset = newValue;
+    }
+
+    function showValueThre1(newValue)
+    {
+        document.getElementById("thre1").innerHTML=newValue;
+        lumThreshold1 = newValue;
+    }
+
+    function showValueThre2(newValue)
+    {
+        document.getElementById("thre2").innerHTML=newValue;
+        lumThreshold2 = newValue;
+    }
+
+    function showValueThre3(newValue)
+    {
+        document.getElementById("thre3").innerHTML=newValue;
+        lumThreshold3 = newValue;
+    }
+
+    function showValueThre4(newValue)
+    {
+        document.getElementById("thre4").innerHTML=newValue;
+        lumThreshold4 = newValue;
+    }
+
+</script>
+
+</head>
+
+
+<body onload="webGLStart();">
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+
+    <canvas id="lesson01-canvas" style="border: none;" width="512" height="512"></canvas>
+	
+    <p>Change the vx_offset : 
+    	<input type="range" min="0" max="1.0" value="0" step="0.01" onchange="showValueXOff(this.value)" />	
+    	<span id="xoff">0.0</span>
+    </p>
+
+    <p>Change the Yoffset : 
+        <input type="range" min="-10.0" max="10.0" value="0" step="1.0" onchange="showValueYOff(this.value)" />    
+        <span id="yoff">0.0</span>
+    </p>
+
+    <p>Change The threshold1:
+        <input type="range" min="0.0" max="1.0" value="0.0" step="0.1" onchange="showValueThre1(this.value)" />
+        <span id="thre1">0.0</span>
+    </p>
+
+    <p>Change The threshold2:
+        <input type="range" min="0.0" max="1.0" value="0.0" step="0.1" onchange="showValueThre2(this.value)" />
+        <span id="thre2">0.0</span>
+    </p>
+
+    <p>Change The threshold3:
+        <input type="range" min="0.0" max="1.0" value="0.0" step="0.1" onchange="showValueThre3(this.value)" />
+        <span id="thre3">0.0</span>
+    </p>
+
+    <p>Change The threshold4:
+        <input type="range" min="0.0" max="1.0" value="0.0" step="0.1" onchange="showValueThre4(this.value)" />
+        <span id="thre4">0.0</span>
+    </p>
+
+    <br/>
+    <a href="http://dizuo.github.io/">&lt;&lt; Back to github</a><br />
+</body>
+
+</html>
