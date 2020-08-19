@@ -16,6 +16,7 @@
     varying vec2 vTextureCoord;
 
     uniform sampler2D uSampler;
+    uniform vec2 uViewportSize;
     
     /* Basic FXAA implementation based on the code on geeks3d.com with the
    modification that the texture2DLod stuff was removed since it's
@@ -304,6 +305,8 @@
         mainShaderProgram.pMatrixUniform = gl.getUniformLocation(mainShaderProgram, "uPMatrix");
         mainShaderProgram.mvMatrixUniform = gl.getUniformLocation(mainShaderProgram, "uMVMatrix");
         mainShaderProgram.samplerUniform = gl.getUniformLocation(mainShaderProgram, "uSampler");
+
+        mainShaderProgram.pViewportUniform = gl.getUniformLocation(shaderProgram, "uViewportSize");
 
         // gl.useProgram(0);
     }
@@ -803,6 +806,8 @@
         gl.bindTexture(gl.TEXTURE_2D, rttTexture);     // 设置绘制纹理
         gl.uniform1i(mainShaderProgram.samplerUniform, 0);
 
+        gl.uniform2f(shaderProgram.pViewportUniform, rttFramebuffer.width, rttFramebuffer.height);
+        
         setMatrixUniforms(mainShaderProgram);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, laptopScreenVertexPositionBuffer.numItems);
 
